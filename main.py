@@ -8,6 +8,7 @@ import urllib.parse
 import aiohttp
 import asyncio
 import aiofiles
+import csv
 
 OK = http.HTTPStatus.OK
 BAD_REQUEST = http.HTTPStatus.BAD_REQUEST
@@ -198,4 +199,33 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # asyncio.run(main())
+    license_dict = {}
+    with open('cx_sca_licenses.csv', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            license_name = row['name']
+            if license_name not in license_dict.keys():
+                license_dict.update({
+                    license_name: {
+                        "Royalty": row["royaltyFree"],
+                        "Name": row["name"],
+                        "CopyRiskScore": row["copyrightRiskScore"],
+                        "PatentRiskScore": row["patentRiskScore"],
+                        "AffectedPackages": set([row["packageId"]])
+                    }
+                })
+            else:
+                license_dict[license_name]["AffectedPackages"].add(row["packageId"])
+    with open("licenses_statistics.csv", "w", newline="") as w_csvfile:
+        fieldnames = ["Royalty", "Name", "CopyRiskScore", "PatentRiskScore", "AffectedPackages"]
+        writer = csv.DictWriter(w_csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for item in license_dict.values():
+            writer.writerow({
+                        "Royalty": item["Royalty"],
+                        "Name": item["Name"],
+                        "CopyRiskScore": item["CopyRiskScore"],
+                        "PatentRiskScore": item["PatentRiskScore"],
+                        "AffectedPackages": len(item["AffectedPackages"])
+                    })
