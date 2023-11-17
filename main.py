@@ -199,7 +199,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    # asyncio.run(main())
+    asyncio.run(main())
     license_dict = {}
     with open('cx_sca_licenses.csv', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
