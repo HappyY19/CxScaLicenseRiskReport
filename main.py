@@ -264,6 +264,6 @@ def package_statistics():
 
 
 if __name__ == "__main__":
-    # asyncio.run(main())
-    # license_statistics()
+    asyncio.run(main())
+    license_statistics()
     package_statistics()
