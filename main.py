@@ -198,8 +198,7 @@ async def main():
         await fetch_all(session, scan_id_info_list, report_csv)
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+def license_statistics():
     license_dict = {}
     with open('cx_sca_licenses.csv', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -223,9 +222,48 @@ if __name__ == "__main__":
         writer.writeheader()
         for item in license_dict.values():
             writer.writerow({
-                        "Royalty": item["Royalty"],
-                        "Name": item["Name"],
-                        "CopyRiskScore": item["CopyRiskScore"],
-                        "PatentRiskScore": item["PatentRiskScore"],
-                        "AffectedPackages": len(item["AffectedPackages"])
-                    })
+                "Royalty": item["Royalty"],
+                "Name": item["Name"],
+                "CopyRiskScore": item["CopyRiskScore"],
+                "PatentRiskScore": item["PatentRiskScore"],
+                "AffectedPackages": len(item["AffectedPackages"])
+            })
+
+
+def package_statistics():
+    packages_dict = {}
+    with open('cx_sca_licenses.csv', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            package_id = row['packageId']
+            if package_id not in packages_dict.keys():
+                packages_dict.update({
+                    package_id: {
+                        "Reference": row["reference"],
+                        "Royalty": row["royaltyFree"],
+                        "Name": row["name"],
+                        "CopyRiskScore": row["copyrightRiskScore"],
+                        "PatentRiskScore": row["patentRiskScore"],
+                        "URL": row["url"],
+                    }
+                })
+    with open("packages_statistics.csv", "w", newline="") as w_csvfile:
+        fieldnames = ["PackageId", "Reference", "Royalty", "Name", "CopyRiskScore", "PatentRiskScore", "URL"]
+        writer = csv.DictWriter(w_csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for key, value in packages_dict.items():
+            writer.writerow({
+                "PackageId": key,
+                "Reference": value["Reference"],
+                "Royalty": value["Royalty"],
+                "Name": value["Name"],
+                "CopyRiskScore": value["CopyRiskScore"],
+                "PatentRiskScore": value["PatentRiskScore"],
+                "URL": value["URL"]
+            })
+
+
+if __name__ == "__main__":
+    # asyncio.run(main())
+    # license_statistics()
+    package_statistics()
